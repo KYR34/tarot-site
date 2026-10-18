@@ -1,0 +1,502 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Daily Tarot & Fortune</title>
+<style>
+  :root {
+    --bg: #1b1433;
+    --panel: #261d47;
+    --gold: #e7c873;
+    --text: #f3eefc;
+    --muted: #b7a9d9;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: Georgia, "Times New Roman", serif;
+    background: radial-gradient(circle at top, #3a2a6b 0%, var(--bg) 60%);
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px 40px;
+  }
+  h1 { color: var(--gold); margin: 0 0 4px; font-weight: normal; letter-spacing: 2px; text-align: center; }
+  h2 { color: var(--gold); font-weight: normal; font-size: 18px; margin: 0 0 8px; letter-spacing: 1px; }
+  .sub { color: var(--muted); margin: 0 0 24px; text-align: center; font-size: 15px; }
+  .panel {
+    width: 100%;
+    max-width: 420px;
+    background: var(--panel);
+    border: 1px solid rgba(231,200,115,0.4);
+    border-radius: 14px;
+    padding: 18px;
+    margin-bottom: 18px;
+  }
+  label { display: block; color: var(--muted); font-size: 14px; margin-bottom: 8px; }
+  input[type="date"] {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid var(--gold);
+    background: #1b1433;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 16px;
+  }
+  .row { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.08); }
+  .row:last-child { border-bottom: none; }
+  .row .k { color: var(--muted); font-size: 14px; }
+  .row .v { color: var(--text); font-size: 15px; text-align: right; }
+  .big { font-size: 28px; color: var(--gold); }
+  .reading { font-size: 15px; line-height: 1.5; margin-top: 8px; }
+  .hidden { display: none; }
+  .card {
+    width: 220px;
+    height: 340px;
+    perspective: 1000px;
+    cursor: pointer;
+    margin: 0 auto 20px;
+  }
+  .inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.8s;
+    transform-style: preserve-3d;
+  }
+  .card.flipped .inner { transform: rotateY(180deg); }
+  .face {
+    position: absolute;
+    inset: 0;
+    border-radius: 14px;
+    backface-visibility: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    text-align: center;
+  }
+  .back {
+    background: repeating-linear-gradient(45deg, #4b3a86 0 10px, #3a2c6a 10px 20px);
+    border: 2px solid var(--gold);
+    font-size: 48px;
+    color: var(--gold);
+  }
+  .front {
+    background: var(--panel);
+    border: 2px solid var(--gold);
+    transform: rotateY(180deg);
+  }
+  .numeral { color: var(--gold); font-size: 14px; letter-spacing: 2px; }
+  .cardname { font-size: 22px; color: var(--gold); margin: 10px 0; }
+  .emoji { font-size: 56px; }
+  .meaning { font-size: 15px; line-height: 1.5; margin-top: 12px; color: var(--text); }
+  .shuffling .inner { animation: shake 0.5s infinite; }
+  @keyframes shake {
+    0%,100% { transform: rotate(0deg); }
+    25% { transform: rotate(-3deg); }
+    75% { transform: rotate(3deg); }
+  }
+  button {
+    background: var(--gold);
+    color: #2b1f4d;
+    border: none;
+    border-radius: 999px;
+    padding: 12px 28px;
+    font-size: 16px;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  button:disabled { opacity: 0.5; cursor: default; }
+  .center { display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 420px; }
+  .status { margin: 14px 0; color: var(--muted); font-size: 14px; text-align: center; min-height: 20px; }
+  .fine { margin-top: 28px; color: var(--muted); font-size: 12px; text-align: center; max-width: 380px; }
+  .swatch { display: inline-block; width: 14px; height: 14px; border-radius: 50%; margin-right: 6px; vertical-align: middle; border: 1px solid rgba(255,255,255,0.4); }
+  .quote { margin-top: 16px; padding: 14px 16px; border-left: 3px solid var(--gold); background: rgba(231,200,115,0.08); border-radius: 8px; }
+  .quote-text { font-style: italic; font-size: 16px; line-height: 1.5; }
+  .quote-tag { color: var(--muted); font-size: 12px; margin-top: 8px; }
+  .more { width: 100%; max-width: 420px; background: var(--panel); border: 1px solid rgba(231,200,115,0.4); border-radius: 14px; padding: 18px; margin-top: 18px; }
+  .more-item { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.08); }
+  .more-item:last-child { border-bottom: none; }
+  .more-item .desc { font-size: 14px; color: var(--muted); }
+  .more-item a { background: var(--gold); color: #2b1f4d; text-decoration: none; border-radius: 999px; padding: 8px 16px; font-size: 14px; white-space: nowrap; }
+  .link-btn { background: none; color: var(--muted); padding: 4px; font-size: 13px; text-decoration: underline; margin-top: 8px; }
+</style>
+</head>
+<body>
+
+<h1>Daily Tarot & Fortune</h1>
+<p class="sub">Enter your birthday for your sign and numbers, then draw today's card. For fun and reflection only.</p>
+
+<!-- Birthday section -->
+<div class="panel" id="birthPanel">
+  <h2>Your birthday</h2>
+  <label for="birthday">Enter your date of birth</label>
+  <input type="date" id="birthday">
+  <div style="margin-top:12px; text-align:center;">
+    <button id="saveBirth">See my readings</button>
+  </div>
+</div>
+
+<!-- Readings section -->
+<div class="panel hidden" id="readingPanel">
+  <h2>Your readings</h2>
+  <div class="row"><span class="k">Zodiac sign</span><span class="v big" id="signName"></span></div>
+  <div class="row"><span class="k">Sign traits</span><span class="v" id="signTraits"></span></div>
+  <div class="row"><span class="k">Life path number</span><span class="v big" id="lifeNum"></span></div>
+  <div class="reading" id="lifeMeaning"></div>
+  <div class="row"><span class="k">Lucky number today</span><span class="v big" id="luckyNum"></span></div>
+  <div class="row"><span class="k">Lucky color today</span><span class="v"><span class="swatch" id="swatch"></span><span id="luckyColor"></span></span></div>
+  <div class="reading"><strong>Today's zodiac reading:</strong><br><span id="zodiacToday"></span></div>
+  <div class="quote">
+    <div class="quote-text" id="quoteText"></div>
+    <div class="quote-tag" id="quoteTag"></div>
+  </div>
+  <div style="text-align:center;">
+    <button class="link-btn" id="changeBirth">Change birthday</button>
+  </div>
+</div>
+
+<!-- Tarot section -->
+<div class="center">
+  <h2>Today's tarot card</h2>
+  <div class="card" id="card" title="Tap to flip">
+    <div class="inner">
+      <div class="face back">✦</div>
+      <div class="face front" id="front"></div>
+    </div>
+  </div>
+  <button id="drawBtn">Draw today's card</button>
+  <div class="status" id="status"></div>
+</div>
+
+<!-- Paid extras section -->
+<div class="more" id="morePanel">
+  <h2>Want more readings?</h2>
+  <div class="more-item">
+    <div><div>Three-card spread</div><div class="desc">Past, present, and future for a deeper look</div></div>
+    <a id="payThree" href="#" target="_blank" rel="noopener">$1</a>
+  </div>
+  <div class="more-item" style="flex-direction:column; align-items:stretch;">
+    <div><div>Full year outlook</div><div class="desc">A short reading for each season of the year ahead. Delivered right after payment.</div></div>
+    <div id="paypal-button-container" style="margin-top:10px;"></div>
+    <div id="yearResult" class="quote hidden"></div>
+  </div>
+  <p class="desc" style="font-size:12px; color:var(--muted); margin:12px 0 0;">Payments go through PayPal. Your outlook appears on this page as soon as payment is confirmed.</p>
+</div>
+
+<div class="fine">This is entertainment, not a prediction of real events. Make your own choices.</div>
+
+<script>
+/* ---------- Tarot data ---------- */
+const CARDS = [
+  { n: "0",    name: "The Fool",           emoji: "🌱", meaning: "New beginnings, curiosity, and a leap of faith. Start something, even if it feels a little unplanned." },
+  { n: "I",    name: "The Magician",       emoji: "🪄", meaning: "You have more tools than you think. Focus your skills on one clear goal today." },
+  { n: "II",   name: "The High Priestess", emoji: "🌙", meaning: "Trust your intuition. Not every answer is obvious yet, so take time to listen inward." },
+  { n: "III",  name: "The Empress",        emoji: "🌿", meaning: "Growth, care, and abundance. Nurture the people and projects you already have." },
+  { n: "IV",   name: "The Emperor",        emoji: "👑", meaning: "Structure and steady leadership. A plan and a clear routine will serve you well today." },
+  { n: "V",    name: "The Hierophant",     emoji: "📜", meaning: "Tradition, learning, and guidance. Asking a mentor or trusted source could help." },
+  { n: "VI",   name: "The Lovers",         emoji: "💞", meaning: "A choice rooted in values. Pay attention to what truly matters to you in a decision." },
+  { n: "VII",  name: "The Chariot",        emoji: "🏇", meaning: "Determination and forward motion. Stay focused and push through the small obstacles." },
+  { n: "VIII", name: "Strength",           emoji: "🦁", meaning: "Calm courage beats force. Patience and gentle persistence can handle hard moments." },
+  { n: "IX",   name: "The Hermit",         emoji: "🕯️", meaning: "Time alone for reflection. Step back and look at the bigger picture." },
+  { n: "X",    name: "Wheel of Fortune",   emoji: "🎡", meaning: "Change is coming, and some of it is outside your control. Adapt and enjoy the ride." },
+  { n: "XI",   name: "Justice",            emoji: "⚖️", meaning: "Fairness and honest accounting. Be clear about what is fair, to yourself and others." },
+  { n: "XII",  name: "The Hanged Man",     emoji: "🙃", meaning: "A pause that brings new perspective. Try seeing the situation from a different angle." },
+  { n: "XIII", name: "Death",              emoji: "🦋", meaning: "An ending that makes room for something new. Let go of what has run its course." },
+  { n: "XIV",  name: "Temperance",         emoji: "🏺", meaning: "Balance and moderation. Blend different parts of your life instead of choosing one extreme." },
+  { n: "XV",   name: "The Devil",          emoji: "🔗", meaning: "Notice what holds you back, like habits or worries. Awareness is the first step to freedom." },
+  { n: "XVI",  name: "The Tower",          emoji: "⚡", meaning: "A sudden shake-up that clears false foundations. It can feel hard, but it opens the way." },
+  { n: "XVII", name: "The Star",           emoji: "⭐", meaning: "Hope, healing, and renewed faith. Small steps toward your dreams are enough for now." },
+  { n: "XVIII",name: "The Moon",           emoji: "🌕", meaning: "Things may feel unclear. Move carefully and trust that clarity will come with time." },
+  { n: "XIX",  name: "The Sun",            emoji: "☀️", meaning: "Joy, success, and warmth. Share your good energy and enjoy the day." },
+  { n: "XX",   name: "Judgement",          emoji: "🎺", meaning: "A call to reflect and begin again. Look at where you have been and what you have learned." },
+  { n: "XXI",  name: "The World",          emoji: "🌍", meaning: "Completion and celebration of progress. Take a moment to appreciate how far you have come." }
+];
+
+/* ---------- Zodiac data ---------- */
+// [month*100+day cutoff, sign name]. A date belongs to the first entry whose cutoff is >= its month*100+day.
+const SIGN_CUTOFFS = [
+  [119, "Capricorn"], [218, "Aquarius"], [320, "Pisces"], [419, "Aries"],
+  [520, "Taurus"], [620, "Gemini"], [722, "Cancer"], [822, "Leo"],
+  [922, "Virgo"], [1022, "Libra"], [1121, "Scorpio"], [1221, "Sagittarius"]
+];
+
+const SIGNS = {
+  Aries:       { traits: "Bold, energetic, direct", emoji: "♈" },
+  Taurus:      { traits: "Steady, loyal, patient", emoji: "♉" },
+  Gemini:      { traits: "Curious, witty, adaptable", emoji: "♊" },
+  Cancer:      { traits: "Caring, intuitive, protective", emoji: "♋" },
+  Leo:         { traits: "Warm, creative, confident", emoji: "♌" },
+  Virgo:       { traits: "Thoughtful, organized, practical", emoji: "♍" },
+  Libra:       { traits: "Charming, fair-minded, social", emoji: "♎" },
+  Scorpio:     { traits: "Passionate, focused, deep", emoji: "♏" },
+  Sagittarius: { traits: "Adventurous, optimistic, honest", emoji: "♐" },
+  Capricorn:   { traits: "Disciplined, ambitious, reliable", emoji: "♑" },
+  Aquarius:    { traits: "Independent, inventive, humanitarian", emoji: "♒" },
+  Pisces:      { traits: "Dreamy, compassionate, imaginative", emoji: "♓" }
+};
+
+const ZODIAC_LINES = [
+  "Good day to finish something you have been putting off.",
+  "Conversations go well today. Say what you mean kindly.",
+  "A small surprise brings you joy. Stay open to it.",
+  "Slow down and rest. Your energy comes back faster than you think.",
+  "Money questions get clearer if you write things down first.",
+  "Someone you haven't spoken to in a while may reach out."
+];
+
+const LUCKY_COLORS = [
+  { name: "Gold", hex: "#e7c873" }, { name: "Emerald", hex: "#2e8b57" },
+  { name: "Sapphire", hex: "#1f4e9c" }, { name: "Ruby", hex: "#9b1b30" },
+  { name: "Lavender", hex: "#b59ad6" }, { name: "Turquoise", hex: "#40c4c4" },
+  { name: "Coral", hex: "#ff7f6e" }, { name: "Silver", hex: "#c0c0c0" },
+  { name: "Violet", hex: "#7b3fa0" }, { name: "Peach", hex: "#ffc39a" }
+];
+
+const LIFE_PATH_MEANINGS = {
+  1: "Independent and driven. You're meant to lead and start things.",
+  2: "Cooperative and sensitive. You do well as a partner and peacemaker.",
+  3: "Creative and expressive. Communication and art come naturally to you.",
+  4: "Practical and dependable. You build lasting structures.",
+  5: "Adventurous and free-spirited. Change and variety energize you.",
+  6: "Nurturing and responsible. Family and community matter deeply to you.",
+  7: "Thoughtful and analytical. You're drawn to wisdom and quiet reflection.",
+  8: "Ambitious and capable. You have a strong sense of achievement.",
+  9: "Compassionate and wise. You care about making the world better."
+};
+
+/* ---------- Quotes matched to the life path number ---------- */
+const QUOTES = {
+  1: [ { text: "The journey of a thousand miles begins with a single step.", by: "Lao Tzu (proverb)" }, { text: "You are braver than you believe, stronger than you seem, and smarter than you think.", by: "Original reflection" } ],
+  2: [ { text: "Kindness is a language the deaf can hear and the blind can see.", by: "Mark Twain (attributed)" }, { text: "Your gentle heart is a strength, not a weakness.", by: "Original reflection" } ],
+  3: [ { text: "Creativity takes courage.", by: "Henri Matisse (attributed)" }, { text: "Say the thing you have been holding back. The world is waiting to hear it.", by: "Original reflection" } ],
+  4: [ { text: "Well done is better than well said.", by: "Benjamin Franklin (attributed)" }, { text: "Small, steady bricks build the strongest house.", by: "Original reflection" } ],
+  5: [ { text: "Life is either a daring adventure or nothing at all.", by: "Helen Keller (attributed)" }, { text: "Change is not the enemy. It is the road to something new.", by: "Original reflection" } ],
+  6: [ { text: "Take care of your people, and they will take care of you.", by: "Original reflection" }, { text: "Home is wherever the people you love gather.", by: "Original reflection" } ],
+  7: [ { text: "The unexamined life is not worth living.", by: "Socrates (attributed)" }, { text: "Stillness is where the answers you need quietly show up.", by: "Original reflection" } ],
+  8: [ { text: "Whether you think you can or you think you can't, you're right.", by: "Henry Ford (attributed)" }, { text: "Success follows the people who keep showing up for the work.", by: "Original reflection" } ],
+  9: [ { text: "No one is useless in this world who lightens the burdens of another.", by: "Charles Dickens (attributed)" }, { text: "Your compassion leaves a mark that lasts longer than you know.", by: "Original reflection" } ]
+};
+
+/* ---------- Helpers ---------- */
+function getSign(month, day) {
+  const code = month * 100 + day;
+  for (const [cutoff, name] of SIGN_CUTOFFS) {
+    if (code <= cutoff) return name;
+  }
+  return "Capricorn";
+}
+
+// Adds up all digits of the birthday until one digit remains
+function lifePathNumber(y, m, d) {
+  let digits = String(y) + String(m).padStart(2, "0") + String(d).padStart(2, "0");
+  let sum = digits.split("").reduce((a, b) => a + Number(b), 0);
+  while (sum > 9) {
+    sum = String(sum).split("").reduce((a, b) => a + Number(b), 0);
+  }
+  return sum;
+}
+
+// Simple hash of today's date string, so the same day gives the same numbers
+function dayHash(str) {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) {
+    h = (h * 31 + str.charCodeAt(i)) >>> 0;
+  }
+  return h;
+}
+
+function todayKey() {
+  const d = new Date();
+  return d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate();
+}
+
+function dayNumber() {
+  return Math.floor(Date.now() / 86400000);
+}
+
+/* ---------- Birthday readings ---------- */
+const birthInput = document.getElementById("birthday");
+const birthPanel = document.getElementById("birthPanel");
+const readingPanel = document.getElementById("readingPanel");
+
+function showReadings(dateStr) {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  const sign = getSign(m, d);
+  const life = lifePathNumber(y, m, d);
+  const hash = dayHash(todayKey() + dateStr);
+  const luckyNumber = (hash % 99) + 1;
+  const color = LUCKY_COLORS[hash % LUCKY_COLORS.length];
+  const zodiacLine = ZODIAC_LINES[(dayNumber() + SIGN_CUTOFFS.findIndex(s => s[1] === sign)) % ZODIAC_LINES.length];
+
+  document.getElementById("signName").textContent = SIGNS[sign].emoji + " " + sign;
+  document.getElementById("signTraits").textContent = SIGNS[sign].traits;
+  document.getElementById("lifeNum").textContent = life;
+  document.getElementById("lifeMeaning").textContent = LIFE_PATH_MEANINGS[life];
+  document.getElementById("luckyNum").textContent = luckyNumber;
+  document.getElementById("luckyColor").textContent = color.name;
+  document.getElementById("swatch").style.background = color.hex;
+  document.getElementById("zodiacToday").textContent = zodiacLine;
+
+  // Pick a quote for this life path number, changing once per day
+  const pool = QUOTES[life];
+  const q = pool[(dayNumber() + life) % pool.length];
+  document.getElementById("quoteText").textContent = "\u201C" + q.text + "\u201D";
+  document.getElementById("quoteTag").textContent = "— " + q.by + " · for life path " + life;
+
+  readingPanel.classList.remove("hidden");
+  birthPanel.classList.add("hidden");
+}
+
+function loadBirthday() {
+  try { return localStorage.getItem("tarotBirthday"); } catch (e) { return null; }
+}
+
+function saveBirthday(v) {
+  try { localStorage.setItem("tarotBirthday", v); } catch (e) {}
+}
+
+document.getElementById("saveBirth").addEventListener("click", () => {
+  if (!birthInput.value) {
+    alert("Please pick your birthday first.");
+    return;
+  }
+  saveBirthday(birthInput.value);
+  showReadings(birthInput.value);
+});
+
+document.getElementById("changeBirth").addEventListener("click", () => {
+  readingPanel.classList.add("hidden");
+  birthPanel.classList.remove("hidden");
+});
+
+const savedBirth = loadBirthday();
+if (savedBirth) {
+  birthInput.value = savedBirth;
+  showReadings(savedBirth);
+}
+
+/* ---------- Paid extras (PayPal, auto delivery) ---------- */
+// Replace with your PayPal REST app Client ID (public, safe to put here). Never put the secret here.
+const PAYPAL_CLIENT_ID = "ATng_wd9wH5DIM6CliQGNe0S9ByABX7PA7CAmFxZUo5NL3xESNuY28BtvAMy9N5t2kOT2rRHK65Ol31J";
+
+function loadPayPalSdk() {
+  return new Promise((resolve, reject) => {
+    const s = document.createElement("script");
+    s.src = "https://www.paypal.com/sdk/js?client-id=" + encodeURIComponent(PAYPAL_CLIENT_ID) + "&currency=USD&intent=capture";
+    s.onload = resolve;
+    s.onerror = reject;
+    document.head.appendChild(s);
+  });
+}
+
+async function postFn(payload) {
+  const res = await fetch("/.netlify/functions/paypal", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+  return { ok: res.ok, data: await res.json() };
+}
+
+function setupYearOutlook() {
+  loadPayPalSdk().then(() => {
+    window.paypal.Buttons({
+      createOrder: async () => {
+        const r = await postFn({ action: "create" });
+        if (!r.ok) throw new Error("Could not start payment");
+        return r.data.id;
+      },
+      onApprove: async (data) => {
+        const life = document.getElementById("lifeNum").textContent;
+        const r = await postFn({ action: "capture", orderID: data.orderID, lifePath: life });
+        const box = document.getElementById("yearResult");
+        box.classList.remove("hidden");
+        box.textContent = r.ok
+          ? "Your " + r.data.year + " outlook: " + r.data.outlook
+          : "Payment could not be confirmed. Please contact the site owner with your PayPal receipt.";
+        document.getElementById("paypal-button-container").classList.add("hidden");
+      },
+      onError: () => {
+        alert("Payment could not be completed. Please try again.");
+      }
+    }).render("#paypal-button-container");
+  }).catch(() => {
+    document.getElementById("paypal-button-container").textContent = "Payment is unavailable right now.";
+  });
+}
+
+setupYearOutlook();
+
+/* ---------- Tarot draw ---------- */
+const KEY = "dailyTarot";
+const card = document.getElementById("card");
+const front = document.getElementById("front");
+const drawBtn = document.getElementById("drawBtn");
+const statusEl = document.getElementById("status");
+
+function showCard(c) {
+  front.innerHTML =
+    '<div class="numeral">' + c.n + '</div>' +
+    '<div class="emoji">' + c.emoji + '</div>' +
+    '<div class="cardname">' + c.name + '</div>' +
+    '<div class="meaning">' + c.meaning + '</div>';
+}
+
+function loadSaved() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(KEY) || "null");
+    if (saved && saved.date === todayKey()) return saved.index;
+  } catch (e) {}
+  return null;
+}
+
+function saveToday(index) {
+  try {
+    localStorage.setItem(KEY, JSON.stringify({ date: todayKey(), index: index }));
+  } catch (e) {}
+}
+
+function draw() {
+  drawBtn.disabled = true;
+  card.classList.remove("flipped");
+  card.classList.add("shuffling");
+  statusEl.textContent = "Shuffling...";
+
+  setTimeout(() => {
+    card.classList.remove("shuffling");
+    const index = Math.floor(Math.random() * CARDS.length);
+    saveToday(index);
+    showCard(CARDS[index]);
+    setTimeout(() => {
+      card.classList.add("flipped");
+      statusEl.textContent = "Come back tomorrow for a new card.";
+      drawBtn.disabled = true;
+    }, 50);
+  }, 1200);
+}
+
+const existing = loadSaved();
+if (existing !== null) {
+  showCard(CARDS[existing]);
+  card.classList.add("flipped");
+  statusEl.textContent = "You already drew today's card. Come back tomorrow.";
+  drawBtn.disabled = true;
+} else {
+  drawBtn.addEventListener("click", draw);
+}
+
+card.addEventListener("click", () => {
+  if (!card.classList.contains("flipped") && !drawBtn.disabled) draw();
+});
+</script>
+
+</body>
+</html>
