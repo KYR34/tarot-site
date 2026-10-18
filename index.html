@@ -24,9 +24,33 @@
     align-items: center;
     padding: 24px 16px 40px;
   }
+  .hidden { display: none !important; }
   h1 { color: var(--gold); margin: 0 0 4px; font-weight: normal; letter-spacing: 2px; text-align: center; }
   h2 { color: var(--gold); font-weight: normal; font-size: 18px; margin: 0 0 8px; letter-spacing: 1px; }
   .sub { color: var(--muted); margin: 0 0 24px; text-align: center; font-size: 15px; }
+
+  /* Welcome screen */
+  .welcome {
+    min-height: calc(100vh - 48px);
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .welcome-card {
+    max-width: 420px;
+    width: 100%;
+    text-align: center;
+    background: var(--panel);
+    border: 1px solid rgba(231,200,115,0.4);
+    border-radius: 16px;
+    padding: 36px 24px;
+  }
+  .welcome-mark { font-size: 40px; color: var(--gold); }
+  .welcome-card h1 { font-size: 30px; margin: 8px 0 14px; }
+  .welcome-text { font-size: 16px; line-height: 1.6; color: var(--text); margin: 0 0 12px; }
+  .welcome-note { font-size: 13px; color: var(--muted); margin: 0 0 24px; }
+
   .panel {
     width: 100%;
     max-width: 420px;
@@ -37,7 +61,7 @@
     margin-bottom: 18px;
   }
   label { display: block; color: var(--muted); font-size: 14px; margin-bottom: 8px; }
-  input[type="date"] {
+  input[type="date"], input[type="number"] {
     width: 100%;
     padding: 10px;
     border-radius: 8px;
@@ -53,7 +77,6 @@
   .row .v { color: var(--text); font-size: 15px; text-align: right; }
   .big { font-size: 28px; color: var(--gold); }
   .reading { font-size: 15px; line-height: 1.5; margin-top: 8px; }
-  .hidden { display: none; }
   .card {
     width: 220px;
     height: 340px;
@@ -121,75 +144,127 @@
   .quote { margin-top: 16px; padding: 14px 16px; border-left: 3px solid var(--gold); background: rgba(231,200,115,0.08); border-radius: 8px; }
   .quote-text { font-style: italic; font-size: 16px; line-height: 1.5; }
   .quote-tag { color: var(--muted); font-size: 12px; margin-top: 8px; }
-  .more { width: 100%; max-width: 420px; background: var(--panel); border: 1px solid rgba(231,200,115,0.4); border-radius: 14px; padding: 18px; margin-top: 18px; }
-  .more-item { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.08); }
-  .more-item:last-child { border-bottom: none; }
-  .more-item .desc { font-size: 14px; color: var(--muted); }
-  .more-item a { background: var(--gold); color: #2b1f4d; text-decoration: none; border-radius: 999px; padding: 8px 16px; font-size: 14px; white-space: nowrap; }
   .link-btn { background: none; color: var(--muted); padding: 4px; font-size: 13px; text-decoration: underline; margin-top: 8px; }
+
+  /* Paid extras */
+  .extra { padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.08); }
+  .extra:last-child { border-bottom: none; }
+  .extra .desc { font-size: 14px; color: var(--muted); margin: 2px 0 8px; }
+  .pp-box { margin-top: 8px; }
+  .result { margin-top: 10px; }
+  .support-row { display: flex; gap: 10px; align-items: center; }
+  .support-row input { flex: 1; }
+  .support-row .cur { color: var(--muted); font-size: 15px; }
 </style>
 </head>
 <body>
 
-<h1>Daily Tarot & Fortune</h1>
-<p class="sub">Enter your birthday for your sign and numbers, then draw today's card. For fun and reflection only.</p>
-
-<!-- Birthday section -->
-<div class="panel" id="birthPanel">
-  <h2>Your birthday</h2>
-  <label for="birthday">Enter your date of birth</label>
-  <input type="date" id="birthday">
-  <div style="margin-top:12px; text-align:center;">
-    <button id="saveBirth">See my readings</button>
+<!-- Welcome screen -->
+<div id="welcome" class="welcome">
+  <div class="welcome-card">
+    <div class="welcome-mark">✦</div>
+    <h1>Welcome</h1>
+    <p class="welcome-text">Welcome to Daily Tarot &amp; Fortune. Enter your birthday to see your sign and numbers, draw today's card, and explore extra readings.</p>
+    <p class="welcome-note">For fun and reflection only.</p>
+    <button id="startBtn">Start</button>
   </div>
 </div>
 
-<!-- Readings section -->
-<div class="panel hidden" id="readingPanel">
-  <h2>Your readings</h2>
-  <div class="row"><span class="k">Zodiac sign</span><span class="v big" id="signName"></span></div>
-  <div class="row"><span class="k">Sign traits</span><span class="v" id="signTraits"></span></div>
-  <div class="row"><span class="k">Life path number</span><span class="v big" id="lifeNum"></span></div>
-  <div class="reading" id="lifeMeaning"></div>
-  <div class="row"><span class="k">Lucky number today</span><span class="v big" id="luckyNum"></span></div>
-  <div class="row"><span class="k">Lucky color today</span><span class="v"><span class="swatch" id="swatch"></span><span id="luckyColor"></span></span></div>
-  <div class="reading"><strong>Today's zodiac reading:</strong><br><span id="zodiacToday"></span></div>
-  <div class="quote">
-    <div class="quote-text" id="quoteText"></div>
-    <div class="quote-tag" id="quoteTag"></div>
-  </div>
-  <div style="text-align:center;">
-    <button class="link-btn" id="changeBirth">Change birthday</button>
-  </div>
-</div>
+<!-- Main app, shown after Start -->
+<div id="app" class="hidden" style="width:100%; display:flex; flex-direction:column; align-items:center;">
 
-<!-- Tarot section -->
-<div class="center">
-  <h2>Today's tarot card</h2>
-  <div class="card" id="card" title="Tap to flip">
-    <div class="inner">
-      <div class="face back">✦</div>
-      <div class="face front" id="front"></div>
+  <h1>Daily Tarot &amp; Fortune</h1>
+  <p class="sub">Enter your birthday for your sign and numbers, then draw today's card.</p>
+
+  <!-- Birthday -->
+  <div class="panel" id="birthPanel">
+    <h2>Your birthday</h2>
+    <label for="birthday">Enter your date of birth</label>
+    <input type="date" id="birthday">
+    <div style="margin-top:12px; text-align:center;">
+      <button id="saveBirth">See my readings</button>
     </div>
   </div>
-  <button id="drawBtn">Draw today's card</button>
-  <div class="status" id="status"></div>
-</div>
 
-<!-- Paid extras section -->
-<div class="more" id="morePanel">
-  <h2>Want more readings?</h2>
-  <div class="more-item" style="flex-direction:column; align-items:stretch;">
-    <div><div>Full year outlook — $3</div><div class="desc">A short reading for each season of the year ahead. Delivered right after payment.</div></div>
-    <div id="paypal-button-container" style="margin-top:10px;"></div>
-    <div id="yearResult" class="quote hidden"></div>
+  <!-- Readings -->
+  <div class="panel hidden" id="readingPanel">
+    <h2>Your readings</h2>
+    <div class="row"><span class="k">Zodiac sign</span><span class="v big" id="signName"></span></div>
+    <div class="row"><span class="k">Sign traits</span><span class="v" id="signTraits"></span></div>
+    <div class="row"><span class="k">Life path number</span><span class="v big" id="lifeNum"></span></div>
+    <div class="reading" id="lifeMeaning"></div>
+    <div class="row"><span class="k">Lucky number today</span><span class="v big" id="luckyNum"></span></div>
+    <div class="row"><span class="k">Lucky color today</span><span class="v"><span class="swatch" id="swatch"></span><span id="luckyColor"></span></span></div>
+    <div class="reading"><strong>Today's zodiac reading:</strong><br><span id="zodiacToday"></span></div>
+    <div class="quote">
+      <div class="quote-text" id="quoteText"></div>
+      <div class="quote-tag" id="quoteTag"></div>
+    </div>
+    <div style="text-align:center;">
+      <button class="link-btn" id="changeBirth">Change birthday</button>
+    </div>
   </div>
-  <p class="desc" style="font-size:12px; color:var(--muted); margin:12px 0 0;">Payments go through PayPal. Your outlook appears on this page as soon as payment is confirmed.</p>
-</div>
 
-<div class="fine">This is entertainment, not a prediction of real events. Make your own choices.</div>
+  <!-- Daily tarot -->
+  <div class="center">
+    <h2>Today's tarot card</h2>
+    <div class="card" id="card" title="Tap to flip">
+      <div class="inner">
+        <div class="face back">✦</div>
+        <div class="face front" id="front"></div>
+      </div>
+    </div>
+    <button id="drawBtn">Draw today's card</button>
+    <div class="status" id="status"></div>
+  </div>
+
+  <!-- Paid extras -->
+  <div class="panel" id="morePanel" style="margin-top:18px;">
+    <h2>Want more readings?</h2>
+
+    <div class="extra">
+      <div>Three-card spread — $1</div>
+      <div class="desc">Past, present, and future for a deeper look.</div>
+      <div class="pp-box" id="pp-spread"></div>
+      <div class="result quote hidden" id="res-spread"></div>
+    </div>
+
+    <div class="extra">
+      <div>Full year outlook — $3</div>
+      <div class="desc">A short reading for each season of the year ahead. Delivered right after payment.</div>
+      <div class="pp-box" id="pp-outlook"></div>
+      <div class="result quote hidden" id="res-outlook"></div>
+    </div>
+
+    <div class="extra">
+      <div>Support this site</div>
+      <div class="desc">Optional. Any amount from $1 to $100 helps keep the site running. Thank you!</div>
+      <div class="support-row">
+        <span class="cur">$</span>
+        <input type="number" id="supportAmount" min="1" max="100" step="1" value="5">
+      </div>
+      <div class="pp-box" id="pp-support"></div>
+      <div class="result quote hidden" id="res-support"></div>
+    </div>
+
+    <p style="font-size:12px; color:var(--muted); margin:12px 0 0;">Payments go through PayPal. Your reading appears on this page as soon as payment is confirmed.</p>
+  </div>
+
+  <div class="fine">This is entertainment, not a prediction of real events. Make your own choices.</div>
+</div>
 
 <script>
+/* ---------- Settings ---------- */
+// Paste your LIVE PayPal Client ID here (copy it from the PayPal Live app).
+const PAYPAL_CLIENT_ID = "PASTE_LIVE_CLIENT_ID_HERE";
+
+/* ---------- Welcome ---------- */
+document.getElementById("startBtn").addEventListener("click", () => {
+  document.getElementById("welcome").classList.add("hidden");
+  document.getElementById("app").classList.remove("hidden");
+  window.scrollTo(0, 0);
+});
+
 /* ---------- Tarot data ---------- */
 const CARDS = [
   { n: "0",    name: "The Fool",           emoji: "🌱", meaning: "New beginnings, curiosity, and a leap of faith. Start something, even if it feels a little unplanned." },
@@ -217,7 +292,6 @@ const CARDS = [
 ];
 
 /* ---------- Zodiac data ---------- */
-// [month*100+day cutoff, sign name]. A date belongs to the first entry whose cutoff is >= its month*100+day.
 const SIGN_CUTOFFS = [
   [119, "Capricorn"], [218, "Aquarius"], [320, "Pisces"], [419, "Aries"],
   [520, "Taurus"], [620, "Gemini"], [722, "Cancer"], [822, "Leo"],
@@ -268,7 +342,6 @@ const LIFE_PATH_MEANINGS = {
   9: "Compassionate and wise. You care about making the world better."
 };
 
-/* ---------- Quotes matched to the life path number ---------- */
 const QUOTES = {
   1: [ { text: "The journey of a thousand miles begins with a single step.", by: "Lao Tzu (proverb)" }, { text: "You are braver than you believe, stronger than you seem, and smarter than you think.", by: "Original reflection" } ],
   2: [ { text: "Kindness is a language the deaf can hear and the blind can see.", by: "Mark Twain (attributed)" }, { text: "Your gentle heart is a strength, not a weakness.", by: "Original reflection" } ],
@@ -290,7 +363,6 @@ function getSign(month, day) {
   return "Capricorn";
 }
 
-// Adds up all digits of the birthday until one digit remains
 function lifePathNumber(y, m, d) {
   let digits = String(y) + String(m).padStart(2, "0") + String(d).padStart(2, "0");
   let sum = digits.split("").reduce((a, b) => a + Number(b), 0);
@@ -300,7 +372,6 @@ function lifePathNumber(y, m, d) {
   return sum;
 }
 
-// Simple hash of today's date string, so the same day gives the same numbers
 function dayHash(str) {
   let h = 0;
   for (let i = 0; i < str.length; i++) {
@@ -316,6 +387,13 @@ function todayKey() {
 
 function dayNumber() {
   return Math.floor(Date.now() / 86400000);
+}
+
+function el(tag, className, text) {
+  const node = document.createElement(tag);
+  if (className) node.className = className;
+  if (text !== undefined) node.textContent = text;
+  return node;
 }
 
 /* ---------- Birthday readings ---------- */
@@ -341,10 +419,9 @@ function showReadings(dateStr) {
   document.getElementById("swatch").style.background = color.hex;
   document.getElementById("zodiacToday").textContent = zodiacLine;
 
-  // Pick a quote for this life path number, changing once per day
   const pool = QUOTES[life];
   const q = pool[(dayNumber() + life) % pool.length];
-  document.getElementById("quoteText").textContent = "\u201C" + q.text + "\u201D";
+  document.getElementById("quoteText").textContent = "“" + q.text + "”";
   document.getElementById("quoteTag").textContent = "— " + q.by + " · for life path " + life;
 
   readingPanel.classList.remove("hidden");
@@ -378,58 +455,6 @@ if (savedBirth) {
   birthInput.value = savedBirth;
   showReadings(savedBirth);
 }
-
-/* ---------- Paid extras (PayPal, auto delivery) ---------- */
-// Replace with your PayPal REST app Client ID (public, safe to put here). Never put the secret here.
-const PAYPAL_CLIENT_ID = "BAAd2jGCqN-qhq8MV-FLnycgvZrEG3JqBDvHg0fyNjnBdSkC24zqlFUyEQtZThRTllbXaLrPXiG5dqQu3c";
-
-function loadPayPalSdk() {
-  return new Promise((resolve, reject) => {
-    const s = document.createElement("script");
-    s.src = "https://www.paypal.com/sdk/js?client-id=" + encodeURIComponent(PAYPAL_CLIENT_ID) + "&currency=USD&intent=capture";
-    s.onload = resolve;
-    s.onerror = reject;
-    document.head.appendChild(s);
-  });
-}
-
-async function postFn(payload) {
-  const res = await fetch("/.netlify/functions/paypal", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload)
-  });
-  return { ok: res.ok, data: await res.json() };
-}
-
-function setupYearOutlook() {
-  loadPayPalSdk().then(() => {
-    window.paypal.Buttons({
-      createOrder: async () => {
-        const r = await postFn({ action: "create" });
-        if (!r.ok) throw new Error("Could not start payment");
-        return r.data.id;
-      },
-      onApprove: async (data) => {
-        const life = document.getElementById("lifeNum").textContent;
-        const r = await postFn({ action: "capture", orderID: data.orderID, lifePath: life });
-        const box = document.getElementById("yearResult");
-        box.classList.remove("hidden");
-        box.textContent = r.ok
-          ? "Your " + r.data.year + " outlook: " + r.data.outlook
-          : "Payment could not be confirmed. Please contact the site owner with your PayPal receipt.";
-        document.getElementById("paypal-button-container").classList.add("hidden");
-      },
-      onError: () => {
-        alert("Payment could not be completed. Please try again.");
-      }
-    }).render("#paypal-button-container");
-  }).catch(() => {
-    document.getElementById("paypal-button-container").textContent = "Payment is unavailable right now.";
-  });
-}
-
-setupYearOutlook();
 
 /* ---------- Tarot draw ---------- */
 const KEY = "dailyTarot";
@@ -491,6 +516,91 @@ if (existing !== null) {
 
 card.addEventListener("click", () => {
   if (!card.classList.contains("flipped") && !drawBtn.disabled) draw();
+});
+
+/* ---------- PayPal ---------- */
+function loadPayPalSdk() {
+  return new Promise((resolve, reject) => {
+    const s = document.createElement("script");
+    s.src = "https://www.paypal.com/sdk/js?client-id=" + encodeURIComponent(PAYPAL_CLIENT_ID) + "&currency=USD&intent=capture";
+    s.onload = resolve;
+    s.onerror = reject;
+    document.head.appendChild(s);
+  });
+}
+
+async function postFn(payload) {
+  const res = await fetch("/.netlify/functions/paypal", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+  let data = {};
+  try { data = await res.json(); } catch (e) {}
+  return { ok: res.ok, data: data };
+}
+
+function showResult(resultId, nodes) {
+  const box = document.getElementById(resultId);
+  box.classList.remove("hidden");
+  box.replaceChildren(...nodes);
+}
+
+function buildResult(product, data) {
+  if (data.type === "spread") {
+    const nodes = [el("div", "quote-tag", "Your three-card spread")];
+    ["Past", "Present", "Future"].forEach((pos, i) => {
+      nodes.push(el("p", "reading", pos + ": " + data.cards[i].name + ". " + data.cards[i].meaning));
+    });
+    return nodes;
+  }
+  if (data.type === "outlook") {
+    return [
+      el("div", "quote-tag", "Your " + data.year + " outlook"),
+      el("p", "reading", data.outlook)
+    ];
+  }
+  return [el("p", "reading", "Thank you for supporting Daily Tarot! Your support keeps the site running.")];
+}
+
+function mountButtons(containerId, resultId, product, getAmount) {
+  window.paypal.Buttons({
+    style: { layout: "vertical", color: "gold", shape: "pill", label: "pay" },
+    createOrder: async () => {
+      if (product === "outlook" && readingPanel.classList.contains("hidden")) {
+        showResult(resultId, [el("p", "reading", "Please enter your birthday above first, so we can personalize your outlook.")]);
+        throw new Error("birthday needed");
+      }
+      const r = await postFn({ action: "create", product: product, amount: getAmount() });
+      if (!r.ok) {
+        showResult(resultId, [el("p", "reading", r.data.error || "Could not start payment. Please try again.")]);
+        throw new Error("create failed");
+      }
+      return r.data.id;
+    },
+    onApprove: async (data) => {
+      const life = document.getElementById("lifeNum").textContent;
+      const r = await postFn({ action: "capture", orderID: data.orderID, product: product, lifePath: life });
+      if (!r.ok) {
+        showResult(resultId, [el("p", "reading", "Payment could not be confirmed. Please contact the site owner with your PayPal receipt.")]);
+        return;
+      }
+      showResult(resultId, buildResult(product, r.data));
+    },
+    onError: () => {
+      showResult(resultId, [el("p", "reading", "Payment could not be completed. Please try again.")]);
+    }
+  }).render("#" + containerId);
+}
+
+loadPayPalSdk().then(() => {
+  mountButtons("pp-spread", "res-spread", "spread", () => undefined);
+  mountButtons("pp-outlook", "res-outlook", "outlook", () => undefined);
+  mountButtons("pp-support", "res-support", "support", () => document.getElementById("supportAmount").value);
+}).catch(() => {
+  ["pp-spread", "pp-outlook", "pp-support"].forEach(id => {
+    document.getElementById(id).textContent = "Payment is unavailable right now.";
+  });
 });
 </script>
 
