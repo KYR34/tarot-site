@@ -256,7 +256,7 @@
 <script>
 /* ---------- Settings ---------- */
 // Paste your LIVE PayPal Client ID here (copy it from the PayPal Live app).
-const PAYPAL_CLIENT_ID = "PASTE_LIVE_CLIENT_ID_HERE";
+const PAYPAL_CLIENT_ID = "BAAd2jGCqN-qhq8MV-FLnycgvZrEG3JqBDvHg0fyNjnBdSkC24zqlFUyEQtZThRTllbXaLrPXiG5dqQu3c";
 
 /* ---------- Welcome ---------- */
 document.getElementById("startBtn").addEventListener("click", () => {
@@ -522,7 +522,7 @@ card.addEventListener("click", () => {
 function loadPayPalSdk() {
   return new Promise((resolve, reject) => {
     const s = document.createElement("script");
-    s.src = "https://www.paypal.com/sdk/js?client-id=" + encodeURIComponent(PAYPAL_CLIENT_ID) + "&currency=USD&intent=capture";
+    s.src = "https://www.paypal.com/sdk/js?client-id=" + encodeURIComponent(BAAd2jGCqN-qhq8MV-FLnycgvZrEG3JqBDvHg0fyNjnBdSkC24zqlFUyEQtZThRTllbXaLrPXiG5dqQu3c) + "&currency=USD&intent=capture";
     s.onload = resolve;
     s.onerror = reject;
     document.head.appendChild(s);
