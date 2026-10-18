@@ -1,6 +1,6 @@
 // Netlify Function: PayPal orders for three products:
-//   spread  -> three-card spread, $1 USD
-//   outlook -> full year outlook, $3 USD
+//   spread  -> three-card spread, $2 USD
+//   outlook -> full year outlook, $4 USD
 //   support -> optional donation, custom amount from $1 to $100 USD
 // Environment variables (set in Netlify, never in the HTML):
 //   PAYPAL_CLIENT_ID, PAYPAL_CLIENT_SECRET
@@ -11,7 +11,7 @@ const BASE = process.env.PAYPAL_ENV === "live"
   : "https://api-m.sandbox.paypal.com";
 
 const CURRENCY = "USD";
-const PRICES = { spread: "1.00", outlook: "3.00" };
+const PRICES = { spread: "2.00", outlook: "4.00" };
 const SUPPORT_MIN = 1;
 const SUPPORT_MAX = 100;
 
@@ -176,4 +176,3 @@ exports.handler = async (event) => {
     return json(500, { error: "Server error" });
   }
 };
-
